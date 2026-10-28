@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>小強資產 - 私人尊榮資產管家</title>
+
+  <!-- iOS Safari 獨立 WebApp / PWA 支援 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="小強資產">
+  <meta name="theme-color" content="#07080b">
+
+  <!-- 1. Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 2. Phosphor Icons 圖示庫 -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- 3. Chart.js 圖表庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 4. Google Fonts: Cinzel (奢華襯線), Outfit (現代金融), Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- 5. Tailwind 自訂設定 -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            black: {
+              950: '#07080b',
+              900: '#0d0f14',
+              850: '#12151c',
+              800: '#171b24',
+              700: '#232836'
+            },
+            gold: {
+              300: '#fcedb9',
+              400: '#e5c158',
+              500: '#d4af37',
+              600: '#aa821f',
+              700: '#7a5a0f',
+              subtle: 'rgba(212, 175, 55, 0.15)',
+              border: 'rgba(212, 175, 55, 0.3)'
+            }
+          },
+          fontFamily: {
+            serif: ['Cinzel', 'serif'],
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+            mono: ['Outfit', 'sans-serif']
+          },
+          boxShadow: {
+            'gold-glow': '0 0 25px rgba(212, 175, 55, 0.2)',
+            'gold-btn': '0 4px 15px rgba(212, 175, 55, 0.35)',
+            'card-glass': '0 8px 32px 0 rgba(0, 0, 0, 0.45)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* 基礎重設與手機平滑滾動 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #07080b;
+      color: #e2e8f0;
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    /* 黑金漸層背景光暈 */
+    .bg-radial-luxury {
+      background: radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.14) 0%, rgba(7, 8, 11, 0) 65%),
+                  radial-gradient(circle at 100% 40%, rgba(212, 175, 55, 0.05) 0%, rgba(7, 8, 11, 0) 50%),
+                  #07080b;
+    }
+    /* 玻璃擬態卡片 */
+    .glass-card {
+      background: rgba(18, 21, 28, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(212, 175, 55, 0.16);
+    }
+    .glass-card:hover {
+      border-color: rgba(212, 175, 55, 0.35);
+    }
+    /* 金屬黃金字體漸層 */
+    .text-gold-gradient {
+      background: linear-gradient(135deg, #fcedb9 0%, #d4af37 50%, #aa821f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .bg-gold-metallic {
+      background: linear-gradient(135deg, #fcedb9 0%, #d4af37 50%, #aa821f 100%);
+    }
+    /* 隱藏滾動條但保持可滾動 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* 手機底部彈窗抽屜動畫 */
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-sheet-enter {
+      animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-radial-luxury text-slate-200">
+
+  <!-- ======================================================== -->
+  <!-- 頂部浮空專屬導航 Header (電腦/平板/手機全適配) -->
+  <!-- ======================================================== -->
+  <header class="sticky top-0 z-40 bg-black-950/80 backdrop-blur-md border-b border-gold-subtle px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <!-- 品牌徽章 -->
+      <div class="w-10 h-10 rounded-xl bg-gold-metallic p-[1px] flex items-center justify-center shadow-gold-glow">
+        <div class="w-full h-full bg-black-950 rounded-[11px] flex items-center justify-center">
+          <span class="font-serif font-black text-gold-400 text-lg tracking-tighter">XQ</span>
+        </div>
+      </div>
+      <div>
+        <h1 class="font-serif font-bold text-base sm:text-lg text-slate-100 tracking-wider">小強資產</h1>
+        <p class="text-[10px] sm:text-xs font-mono text-gold-400/80">PRIVATE WEALTH CONCIERGE</p>
+      </div>
+    </div>
+
+    <!-- 儲存狀態與功能操作 -->
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <!-- 儲存指示狀態燈 (Safari / IndexedDB 即時回饋) -->
+      <div id="saveBadge" class="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="saveBadgeText">Safari 本地自動儲存</span>
+      </div>
+
+      <!-- 下載備份 (防呆按鈕) -->
+      <button onclick="exportData()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-gold-subtle text-gold-400 hover:bg-gold-500/10 text-xs font-mono flex items-center space-x-1 transition active:scale-95" title="匯出 JSON 備份檔">
+        <i class="ph-bold ph-download-simple text-base sm:text-sm"></i>
+        <span class="hidden sm:inline">備份</span>
+      </button>
+
+      <!-- 記一筆按鈕 (電腦平板) -->
+      <button onclick="openModal('modalTx')" class="hidden sm:inline-flex items-center space-x-1.5 bg-gold-metallic text-black-950 font-bold px-3.5 py-1.5 rounded-xl text-xs sm:text-sm shadow-gold-btn hover:opacity-95 transition active:scale-95">
+        <i class="ph-bold ph-plus text-base"></i>
+        <span>記一筆</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 電腦/平板端：水平分頁標籤 (手機端改置底 Navigation) -->
+  <!-- ======================================================== -->
+  <nav class="hidden md:flex items-center space-x-2 px-8 pt-4 border-b border-gold-subtle bg-black-900/40">
+    <button onclick="switchTab('dashboard')" id="pc-tab-dashboard" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-gold-500 text-gold-400 flex items-center space-x-2">
+      <i class="ph ph-squares-four text-lg"></i>
+      <span>資產總覽</span>
+    </button>
+    <button onclick="switchTab('transactions')" id="pc-tab-transactions" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+      <i class="ph ph-receipt text-lg"></i>
+      <span>收支流水帳</span>
+    </button>
+    <button onclick="switchTab('funds')" id="pc-tab-funds" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+      <i class="ph ph-chart-line-up text-lg"></i>
+      <span>基金投資部位</span>
+    </button>
+    <button onclick="switchTab('cards')" id="pc-tab-cards" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+      <i class="ph ph-credit-card text-lg"></i>
+      <span>信用卡費負債</span>
+    </button>
+    <button onclick="switchTab('salary')" id="pc-tab-salary" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+      <i class="ph ph-sliders text-lg"></i>
+      <span>薪資分流配置</span>
+    </button>
+    <button onclick="switchTab('accounts')" id="pc-tab-accounts" class="pc-nav-btn px-4 py-2.5 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+      <i class="ph ph-bank text-lg"></i>
+      <span>活存與錢包</span>
+    </button>
+  </nav>
+
+  <!-- ======================================================== -->
+  <!-- 主內容容器 -->
+  <!-- ======================================================== -->
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-28 md:pb-12">
+
+    <!-- TAB 1: 淨資產總覽儀表板 -->
+    <section id="view-dashboard" class="tab-view block space-y-5 sm:space-y-6">
+      <!-- 淨資產金牌大卡 -->
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-7 relative overflow-hidden shadow-card-glass border-gold-border/40">
+        <div class="absolute -right-8 -top-8 w-36 h-36 bg-gold-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400">
+          <span class="tracking-widest uppercase flex items-center space-x-1.5">
+            <i class="ph-bold ph-shield-check text-gold-400"></i>
+            <span>NET WORTH 淨資產淨值</span>
+          </span>
+          <span id="dashDateToday" class="text-gold-400/80 font-mono text-[11px] sm:text-xs"></span>
+        </div>
+        <div class="mt-2.5 sm:mt-4 flex items-baseline space-x-1">
+          <span class="text-3xl sm:text-5xl font-mono font-extrabold text-gold-gradient tracking-tight" id="dashNetWorth">$0</span>
+        </div>
+        <div class="mt-4 pt-3.5 border-t border-gold-subtle grid grid-cols-3 gap-2 text-center sm:text-left">
+          <div>
+            <span class="text-[10px] sm:text-xs text-slate-400 block font-mono">總資產 (現值+活存)</span>
+            <span class="text-sm sm:text-lg font-mono font-bold text-slate-100" id="dashTotalAssets">$0</span>
+          </div>
+          <div>
+            <span class="text-[10px] sm:text-xs text-slate-400 block font-mono">信用卡總應繳負債</span>
+            <span class="text-sm sm:text-lg font-mono font-bold text-rose-400" id="dashTotalLiabilities">$0</span>
+          </div>
+          <div>
+            <span class="text-[10px] sm:text-xs text-slate-400 block font-mono">當月收支淨結餘</span>
+            <span class="text-sm sm:text-lg font-mono font-bold text-emerald-400" id="dashMonthBalance">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 手機專屬捷徑列 (Quick Actions) -->
+      <div class="grid grid-cols-2 gap-3 md:hidden">
+        <button onclick="openModal('modalTx')" class="p-3.5 rounded-2xl glass-card flex items-center space-x-3 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-xl bg-gold-metallic text-black-950 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-plus text-lg"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-xs font-bold text-slate-100">快速記帳</div>
+            <div class="text-[10px] text-slate-400 font-mono">收入 / 支出扣帳</div>
+          </div>
+        </button>
+        <button onclick="switchTab('cards')" class="p-3.5 rounded-2xl glass-card flex items-center space-x-3 active:scale-95 transition">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-credit-card text-lg"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-xs font-bold text-slate-100">卡費結清</div>
+            <div class="text-[10px] text-slate-400 font-mono">倒數與一鍵繳納</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- 雙圖表區 (Chart.js) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- 資產配置環狀圖 -->
+        <div class="glass-card p-4 sm:p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm sm:text-base font-bold text-slate-100 flex items-center space-x-2">
+              <i class="ph-bold ph-chart-pie-slice text-gold-400"></i>
+              <span>資產配置比例</span>
+            </h3>
+            <span class="text-xs font-mono text-slate-400">流動 vs 投資</span>
+          </div>
+          <div class="relative h-56 sm:h-64 w-full flex items-center justify-center">
+            <canvas id="chartPieAssets"></canvas>
+          </div>
+        </div>
+
+        <!-- 當月各類別開銷分析柱狀圖 -->
+        <div class="glass-card p-4 sm:p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm sm:text-base font-bold text-slate-100 flex items-center space-x-2">
+              <i class="ph-bold ph-chart-bar text-gold-400"></i>
+              <span>當月開銷結構</span>
+            </h3>
+            <span class="text-xs font-mono text-slate-400">主要消費分類</span>
+          </div>
+          <div class="relative h-56 sm:h-64 w-full">
+            <canvas id="chartBarExpense"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: 收支明細流水帳 -->
+    <section id="view-transactions" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-slate-100">日常收支流水帳</h2>
+          <p class="text-xs text-slate-400 font-mono">即時連動銀行餘額與信用卡未出帳</p>
+        </div>
+        <button onclick="openModal('modalTx')" class="p-2 sm:px-3.5 sm:py-2 bg-gold-metallic text-black-950 font-bold rounded-xl text-xs flex items-center space-x-1 shadow-gold-btn">
+          <i class="ph-bold ph-plus"></i>
+          <span>記一筆</span>
+        </button>
+      </div>
+
+      <!-- 篩選膠囊 (手機好滑) -->
+      <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1">
+        <button onclick="filterTx('ALL')" id="filter-all" class="tx-filter-pill px-3.5 py-1.5 rounded-full text-xs font-mono font-medium bg-gold-500/20 text-gold-400 border border-gold-500/40 whitespace-nowrap">全部紀錄</button>
+        <button onclick="filterTx('EXPENSE')" id="filter-expense" class="tx-filter-pill px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-slate-400 border border-gold-subtle hover:bg-gold-500/10 whitespace-nowrap">支出開銷</button>
+        <button onclick="filterTx('INCOME')" id="filter-income" class="tx-filter-pill px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-slate-400 border border-gold-subtle hover:bg-gold-500/10 whitespace-nowrap">收益入帳</button>
+      </div>
+
+      <!-- 流水帳列表 -->
+      <div id="txListContainer" class="space-y-2.5">
+        <!-- 動態渲染流水帳條目 -->
+      </div>
+    </section>
+
+    <!-- TAB 3: 基金投資部位追蹤 -->
+    <section id="view-funds" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-slate-100">基金與投資管理</h2>
+          <p class="text-xs text-slate-400 font-mono">追蹤本金、市值與台灣規格損益（紅漲綠跌）</p>
+        </div>
+        <button onclick="openAddFundModal()" class="p-2 sm:px-3.5 sm:py-2 bg-gold-metallic text-black-950 font-bold rounded-xl text-xs flex items-center space-x-1 shadow-gold-btn">
+          <i class="ph-bold ph-plus"></i>
+          <span>新增標的</span>
+        </button>
+      </div>
+
+      <!-- 統計面板 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="glass-card p-3 sm:p-4 rounded-xl">
+          <span class="text-[11px] text-slate-400 font-mono block">累積投入本金</span>
+          <span class="text-base sm:text-lg font-mono font-bold text-slate-200" id="fundTotalCost">$0</span>
+        </div>
+        <div class="glass-card p-3 sm:p-4 rounded-xl">
+          <span class="text-[11px] text-slate-400 font-mono block">當前總市值</span>
+          <span class="text-base sm:text-lg font-mono font-bold text-gold-gradient" id="fundTotalMarket">$0</span>
+        </div>
+        <div class="glass-card p-3 sm:p-4 rounded-xl">
+          <span class="text-[11px] text-slate-400 font-mono block">未實現總損益</span>
+          <span class="text-base sm:text-lg font-mono font-bold" id="fundTotalProfit">$0</span>
+        </div>
+        <div class="glass-card p-3 sm:p-4 rounded-xl">
+          <span class="text-[11px] text-slate-400 font-mono block">總投資報酬率</span>
+          <span class="text-base sm:text-lg font-mono font-bold" id="fundTotalRoi">0%</span>
+        </div>
+      </div>
+
+      <!-- 手機端卡片清單 (取代溢出橫向表格) -->
+      <div id="fundCardListMobile" class="space-y-3 sm:hidden">
+        <!-- 手機卡片動態載入 -->
+      </div>
+
+      <!-- 平板與電腦端表格 -->
+      <div class="hidden sm:block glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs md:text-sm">
+            <thead>
+              <tr class="border-b border-gold-subtle bg-black-900/60 font-mono text-gold-400 text-[11px] tracking-wider uppercase">
+                <th class="py-3 px-4">標的名稱</th>
+                <th class="py-3 px-4 text-right">單位數</th>
+                <th class="py-3 px-4 text-right">本金</th>
+                <th class="py-3 px-4 text-right">目前現值</th>
+                <th class="py-3 px-4 text-right">損益 ($)</th>
+                <th class="py-3 px-4 text-right">報酬率 (ROI)</th>
+                <th class="py-3 px-4 text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody id="fundTableBody">
+              <!-- 桌機表格條目 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 信用卡費與負債管理 -->
+    <section id="view-cards" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-slate-100">信用卡與卡費管理</h2>
+          <p class="text-xs text-slate-400 font-mono">繳款截止日倒數、應繳結清連動活存扣款</p>
+        </div>
+        <button onclick="openAddCardModal()" class="p-2 sm:px-3.5 sm:py-2 bg-gold-metallic text-black-950 font-bold rounded-xl text-xs flex items-center space-x-1 shadow-gold-btn">
+          <i class="ph-bold ph-plus"></i>
+          <span>新增信用卡</span>
+        </button>
+      </div>
+
+      <!-- 信用卡格狀列表 -->
+      <div id="cardGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 動態渲染卡片清單 -->
+      </div>
+    </section>
+
+    <!-- TAB 5: 薪資水庫自動分流配置 -->
+    <section id="view-salary" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-slate-100">薪資自動分流與預算</h2>
+          <p class="text-xs text-slate-400 font-mono">設定薪資與 4 大分流池，發薪日一鍵模擬撥款</p>
+        </div>
+        <button onclick="simulateSalaryPayday()" class="px-3.5 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold rounded-xl text-xs flex items-center space-x-1 hover:bg-emerald-500/30 transition">
+          <i class="ph-bold ph-check-circle"></i>
+          <span>一鍵發薪入帳</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- 薪資基本設定 -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+          <h3 class="text-sm font-bold text-gold-400 flex items-center space-x-2">
+            <i class="ph-bold ph-currency-dollar"></i>
+            <span>月收入底薪設定</span>
+          </h3>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">每月預估底薪 (TWD)</label>
+            <input type="number" id="inputSalaryBase" onchange="onSalaryConfigChange()" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-slate-100 font-mono font-bold text-base focus:border-gold-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">每月發薪日</label>
+            <input type="number" id="inputSalaryPayday" min="1" max="31" onchange="onSalaryConfigChange()" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-slate-100 font-mono text-sm focus:border-gold-400 focus:outline-none">
+          </div>
+          <div class="p-3 bg-gold-500/10 rounded-xl border border-gold-subtle/50 text-[11px] text-gold-400/90 leading-relaxed font-mono">
+            提示：調整右側比例將即時計算出撥款至各帳戶與投資的預算金額。
+          </div>
+        </div>
+
+        <!-- 4 象限滑桿比例 -->
+        <div class="glass-card p-5 rounded-2xl md:col-span-2 space-y-4">
+          <h3 class="text-sm font-bold text-slate-200">四大分流配置比例</h3>
+
+          <div class="space-y-4">
+            <!-- 必要生活 -->
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">必要生活支出 (房租、飲食、交通)</span>
+                <span class="text-gold-400 font-bold" id="labelRatioLiving">40% (<span id="amtLiving">$0</span>)</span>
+              </div>
+              <input type="range" id="sliderLiving" min="0" max="100" oninput="onSalaryConfigChange()" class="w-full accent-gold-500">
+            </div>
+
+            <!-- 投資儲蓄 -->
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">指數投資與資產配置 (ETF、基金)</span>
+                <span class="text-gold-400 font-bold" id="labelRatioInvest">30% (<span id="amtInvest">$0</span>)</span>
+              </div>
+              <input type="range" id="sliderInvest" min="0" max="100" oninput="onSalaryConfigChange()" class="w-full accent-gold-500">
+            </div>
+
+            <!-- 緊急預備 -->
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">緊急預備金水庫 (活儲備用)</span>
+                <span class="text-gold-400 font-bold" id="labelRatioEmergency">20% (<span id="amtEmergency">$0</span>)</span>
+              </div>
+              <input type="range" id="sliderEmergency" min="0" max="100" oninput="onSalaryConfigChange()" class="w-full accent-gold-500">
+            </div>
+
+            <!-- 自由享樂 -->
+            <div>
+              <div class="flex justify-between text-xs font-mono mb-1">
+                <span class="text-slate-300">享樂與個人提升 (娛樂、購物、旅行)</span>
+                <span class="text-gold-400 font-bold" id="labelRatioFun">10% (<span id="amtFun">$0</span>)</span>
+              </div>
+              <input type="range" id="sliderFun" min="0" max="100" oninput="onSalaryConfigChange()" class="w-full accent-gold-500">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: 銀行活存與現金帳戶 -->
+    <section id="view-accounts" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg sm:text-xl font-serif font-bold text-slate-100">活存帳戶與現金錢包</h2>
+          <p class="text-xs text-slate-400 font-mono">管理所有流動資金與扣款來源帳戶</p>
+        </div>
+        <button onclick="openAddAccountModal()" class="p-2 sm:px-3.5 sm:py-2 bg-gold-metallic text-black-950 font-bold rounded-xl text-xs flex items-center space-x-1 shadow-gold-btn">
+          <i class="ph-bold ph-plus"></i>
+          <span>新增帳戶</span>
+        </button>
+      </div>
+
+      <div id="accountGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 動態渲染帳戶卡片 -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- 手機版專屬：底部原生質感懸浮導航列 (Bottom Tab Bar) -->
+  <!-- ======================================================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-black-950/95 backdrop-blur-xl border-t border-gold-subtle px-2 pt-2 pb-5 flex justify-around items-center">
+    <button onclick="switchTab('dashboard')" id="mob-tab-dashboard" class="mob-nav-btn flex flex-col items-center text-gold-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-squares-four text-xl mb-0.5"></i>
+      <span>總覽</span>
+    </button>
+    <button onclick="switchTab('transactions')" id="mob-tab-transactions" class="mob-nav-btn flex flex-col items-center text-slate-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-receipt text-xl mb-0.5"></i>
+      <span>流水帳</span>
+    </button>
+    <button onclick="switchTab('funds')" id="mob-tab-funds" class="mob-nav-btn flex flex-col items-center text-slate-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-chart-line-up text-xl mb-0.5"></i>
+      <span>投資</span>
+    </button>
+    <button onclick="switchTab('cards')" id="mob-tab-cards" class="mob-nav-btn flex flex-col items-center text-slate-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-credit-card text-xl mb-0.5"></i>
+      <span>卡費</span>
+    </button>
+    <button onclick="switchTab('salary')" id="mob-tab-salary" class="mob-nav-btn flex flex-col items-center text-slate-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-sliders text-xl mb-0.5"></i>
+      <span>薪資</span>
+    </button>
+    <button onclick="switchTab('accounts')" id="mob-tab-accounts" class="mob-nav-btn flex flex-col items-center text-slate-400 text-[10px] font-mono py-1">
+      <i class="ph-bold ph-bank text-xl mb-0.5"></i>
+      <span>帳戶</span>
+    </button>
+  </nav>
+
+  <!-- 手機版右下角快捷浮動記帳按鈕 (FAB) -->
+  <button onclick="openModal('modalTx')" class="md:hidden fixed right-4 bottom-20 z-50 w-12 h-12 rounded-full bg-gold-metallic text-black-950 font-bold flex items-center justify-center shadow-gold-btn active:scale-90 transition">
+    <i class="ph-bold ph-plus text-2xl"></i>
+  </button>
+
+  <!-- ======================================================== -->
+  <!-- 模態視窗集合 (手機端自適應為底部滑出抽屜 Bottom Sheet) -->
+  <!-- ======================================================== -->
+
+  <!-- 1. 記一筆收支彈窗 (Modal Tx) -->
+  <div id="modalTx" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-sheet-enter w-full sm:max-w-md bg-black-900 border-t sm:border border-gold-border rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-gold-subtle">
+        <h3 class="text-base sm:text-lg font-bold font-serif text-gold-400">記一筆新收支</h3>
+        <button onclick="closeModal('modalTx')" class="text-slate-400 hover:text-slate-200 text-xl p-1"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="mt-4 space-y-3.5">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">交易類型</label>
+            <select id="txType" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+              <option value="EXPENSE">支出開銷 (-)</option>
+              <option value="INCOME">收益入帳 (+)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">交易分類</label>
+            <select id="txCategory" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+              <option value="餐飲美食">餐飲美食</option>
+              <option value="日常開銷">日常開銷</option>
+              <option value="交通出行">交通出行</option>
+              <option value="品味購物">品味購物</option>
+              <option value="休閒生活">休閒生活</option>
+              <option value="投資收益">投資收益</option>
+              <option value="薪資入帳">薪資入帳</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">金額 (TWD)</label>
+          <input type="number" id="txAmount" placeholder="請輸入金額" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3.5 py-2.5 text-base font-mono font-bold text-gold-300 focus:border-gold-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">支付或入帳來源 (連動帳戶/信用卡)</label>
+          <select id="txAccount" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">交易日期</label>
+            <input type="date" id="txDate" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">備註說明</label>
+            <input type="text" id="txNote" placeholder="例如：商業午餐" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-3">
+          <button onclick="saveTransaction()" class="w-full py-3 bg-gold-metallic text-black-950 font-bold rounded-xl text-sm shadow-gold-btn active:scale-95 transition">確認保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 基金投資彈窗 (Modal Fund) -->
+  <div id="modalFund" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-sheet-enter w-full sm:max-w-md bg-black-900 border-t sm:border border-gold-border rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-gold-subtle">
+        <h3 class="text-base sm:text-lg font-bold font-serif text-gold-400" id="fundModalTitle">投資標的設定</h3>
+        <button onclick="closeModal('modalFund')" class="text-slate-400 hover:text-slate-200 text-xl p-1"><i class="ph ph-x"></i></button>
+      </div>
+      <input type="hidden" id="fundId">
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">標的名稱或代碼</label>
+          <input type="text" id="fundName" placeholder="例如：元大台灣50 (0050)" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">持有單位股數</label>
+          <input type="number" id="fundUnits" placeholder="例如：1000" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">購入總本金 (TWD)</label>
+          <input type="number" id="fundCost" placeholder="例如：150000" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">目前總市值 (TWD)</label>
+          <input type="number" id="fundMarketValue" placeholder="例如：182000" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div class="pt-3">
+          <button onclick="saveFund()" class="w-full py-3 bg-gold-metallic text-black-950 font-bold rounded-xl text-sm shadow-gold-btn active:scale-95 transition">確認保存標的</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 信用卡編輯彈窗 (Modal Card) -->
+  <div id="modalCard" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-sheet-enter w-full sm:max-w-md bg-black-900 border-t sm:border border-gold-border rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-gold-subtle">
+        <h3 class="text-base sm:text-lg font-bold font-serif text-gold-400" id="cardModalTitle">信用卡管理</h3>
+        <button onclick="closeModal('modalCard')" class="text-slate-400 hover:text-slate-200 text-xl p-1"><i class="ph ph-x"></i></button>
+      </div>
+      <input type="hidden" id="cardId">
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">信用卡卡名</label>
+          <input type="text" id="cardName" placeholder="例如：國泰 CUBE 卡" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">本期已出帳應繳金額</label>
+          <input type="number" id="cardBill" placeholder="0" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">未出帳消費金額</label>
+          <input type="number" id="cardUnbilled" placeholder="0" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">繳款截止日期</label>
+          <input type="date" id="cardDueDate" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-xs font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div class="pt-3">
+          <button onclick="saveCard()" class="w-full py-3 bg-gold-metallic text-black-950 font-bold rounded-xl text-sm shadow-gold-btn active:scale-95 transition">確認保存卡片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 結清卡費專用扣款彈窗 (Modal Pay Card) -->
+  <div id="modalPayCard" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-sheet-enter w-full sm:max-w-md bg-black-900 border-t sm:border border-gold-border rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-gold-subtle">
+        <h3 class="text-base sm:text-lg font-bold font-serif text-gold-400">一鍵結清本期卡費</h3>
+        <button onclick="closeModal('modalPayCard')" class="text-slate-400 hover:text-slate-200 text-xl p-1"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="mt-4 space-y-4">
+        <div class="p-3 bg-black-950 rounded-xl border border-gold-subtle text-center">
+          <span class="text-xs text-slate-400 block font-mono" id="payCardNameLabel">卡片名稱</span>
+          <span class="text-2xl font-mono font-bold text-rose-400 mt-1 block" id="payCardAmountLabel">$0</span>
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">請選擇扣款活存帳戶</label>
+          <select id="payCardAccountSelect" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none"></select>
+        </div>
+        <div class="text-[11px] text-slate-400 leading-relaxed font-mono">
+          ※ 結清後，該張信用卡應繳帳單將清零，並自扣款帳戶扣除同等金額，自動記入一筆支出流水帳。
+        </div>
+        <div class="pt-2">
+          <button onclick="confirmPayCard()" class="w-full py-3 bg-gold-metallic text-black-950 font-bold rounded-xl text-sm shadow-gold-btn active:scale-95 transition">確認扣款結清</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 帳戶新增/編輯彈窗 (Modal Account) -->
+  <div id="modalAccount" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-sheet-enter w-full sm:max-w-md bg-black-900 border-t sm:border border-gold-border rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 sm:hidden"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-gold-subtle">
+        <h3 class="text-base sm:text-lg font-bold font-serif text-gold-400" id="accountModalTitle">帳戶錢包設定</h3>
+        <button onclick="closeModal('modalAccount')" class="text-slate-400 hover:text-slate-200 text-xl p-1"><i class="ph ph-x"></i></button>
+      </div>
+      <input type="hidden" id="accId">
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">帳戶名稱</label>
+          <input type="text" id="accName" placeholder="例如：台新 Richart 活儲" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">帳戶類型</label>
+          <select id="accType" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none">
+            <option value="bank">銀行活儲戶</option>
+            <option value="cash">隨身現金錢包</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">當前可用餘額 (TWD)</label>
+          <input type="number" id="accBalance" placeholder="0" class="w-full bg-black-950 border border-gold-subtle rounded-xl px-3 py-2 text-sm font-mono text-slate-100 focus:outline-none">
+        </div>
+        <div class="pt-3">
+          <button onclick="saveAccount()" class="w-full py-3 bg-gold-metallic text-black-950 font-bold rounded-xl text-sm shadow-gold-btn active:scale-95 transition">確認保存帳戶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浮空通知 Toast (取代瀏覽器 alert) -->
+  <div id="toastNotification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform -translate-y-28 opacity-0">
+    <div class="bg-black-900 border border-gold-400 text-slate-100 text-xs sm:text-sm font-mono px-4 py-2.5 rounded-full shadow-gold-btn flex items-center space-x-2">
+      <i class="ph-bold ph-bell-simple-ringing text-gold-400"></i>
+      <span id="toastMsg">操作已完成</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 核心 JavaScript 邏輯 (Safari IndexedDB + 完整防禦) -->
+  <!-- ======================================================== -->
+  <script>
+    // 預設示範數據
+    const DEFAULT_DATA = {
+      accounts: [
+        { id: 'acc-1', name: '台新 Richart 活儲', balance: 185000, type: 'bank' },
+        { id: 'acc-2', name: '國泰世華 投資戶', balance: 350000, type: 'bank' },
+        { id: 'acc-3', name: '隨身現金錢包', balance: 8500, type: 'cash' }
+      ],
+      cards: [
+        { id: 'card-1', name: '國泰 CUBE 卡', currentBill: 16800, unbilled: 4200, dueDate: '2026-11-15' },
+        { id: 'card-2', name: '富邦 J 卡', currentBill: 8900, unbilled: 1580, dueDate: '2026-11-08' }
+      ],
+      funds: [
+        { id: 'fund-1', name: '元大台灣50 (0050)', units: 2500, cost: 325000, marketValue: 462500 },
+        { id: 'fund-2', name: '國泰永續高股息 (00878)', units: 8000, cost: 168000, marketValue: 184000 },
+        { id: 'fund-3', name: '富達全球科技基金', units: 450, cost: 120000, marketValue: 153000 }
+      ],
+      salaryConfig: {
+        baseSalary: 72000,
+        payday: 5,
+        ratios: { living: 40, investment: 30, emergency: 20, fun: 10 }
+      },
+      transactions: [
+        { id: 'tx-1', date: '2026-10-28', type: 'EXPENSE', category: '餐飲美食', amount: 320, account: 'card-1', note: '商業午餐' },
+        { id: 'tx-2', date: '2026-10-27', type: 'EXPENSE', category: '休閒生活', amount: 1500, account: 'acc-1', note: '健身房會費' },
+        { id: 'tx-3', date: '2026-10-25', type: 'INCOME', category: '投資收益', amount: 6800, account: 'acc-2', note: 'ETF 配息款入帳' },
+        { id: 'tx-4', date: '2026-10-24', type: 'EXPENSE', category: '品味購物', amount: 2450, account: 'card-2', note: '秋冬保暖外套' }
+      ]
+    };
+
+    // 儲存金鑰與全域變數
+    const STORAGE_KEY = 'xq_wealth_tracker_data_v3';
+    const DB_NAME = 'XQWealthTrackerDB';
+    const DB_STORE = 'appDataStore';
+
+    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    let dbInstance = null;
+    let chartPie = null;
+    let chartBar = null;
+    let currentFilter = 'ALL';
+    let currentPayingCardId = null;
+
+    // 貨幣格式化 (加入千分位)
+    function formatCurrency(num) {
+      return (Number(num) || 0).toLocaleString('zh-TW', { maximumFractionDigits: 0 });
+    }
+
+    // 彈出 Toast 提示
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMsg');
+      if (toast && text) {
+        text.textContent = msg;
+        toast.classList.remove('-translate-y-28', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('-translate-y-28', 'opacity-0');
+        }, 2400);
+      }
+    }
+
+    // 初始化 Safari 專屬 IndexedDB
+    function initDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) return resolve(null);
+        try {
+          const request = indexedDB.open(DB_NAME, 1);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(DB_STORE)) {
+              db.createObjectStore(DB_STORE, { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = (e) => {
+            dbInstance = e.target.result;
+            resolve(dbInstance);
+          };
+          request.onerror = () => resolve(null);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    }
+
+    // 多重安全保存（IndexedDB 優先，容錯同步至 localStorage 與 sessionStorage）
+    async function saveData() {
+      const payload = JSON.stringify(appData);
+
+      // 1. IndexedDB 永久寫入
+      if (dbInstance) {
+        try {
+          const tx = dbInstance.transaction([DB_STORE], 'readwrite');
+          const store = tx.objectStore(DB_STORE);
+          store.put({ id: 'current_user_profile', data: appData, updatedAt: Date.now() });
+        } catch (e) {
+          console.warn('IndexedDB 寫入被拒，切換降級儲存');
+        }
+      }
+
+      // 2. localStorage 備援
+      try { localStorage.setItem(STORAGE_KEY, payload); } catch (e) {}
+
+      // 3. sessionStorage 備援
+      try { sessionStorage.setItem(STORAGE_KEY, payload); } catch (e) {}
+
+      // 更新指示燈狀態
+      const badgeText = document.getElementById('saveBadgeText');
+      if (badgeText) {
+        badgeText.textContent = '已保存完畢';
+        setTimeout(() => { badgeText.textContent = 'Safari 本地自動儲存'; }, 1000);
+      }
+    }
+
+    // 啟動時讀取資料
+    async function loadData() {
+      await initDB();
+
+      // 優先嘗試從 IndexedDB 讀取
+      if (dbInstance) {
+        const idbData = await new Promise((resolve) => {
+          try {
+            const tx = dbInstance.transaction([DB_STORE], 'readonly');
+            const store = tx.objectStore(DB_STORE);
+            const req = store.get('current_user_profile');
+            req.onsuccess = () => resolve(req.result ? req.result.data : null);
+            req.onerror = () => resolve(null);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+
+        if (idbData && typeof idbData === 'object') {
+          hydrateData(idbData);
+          return;
+        }
+      }
+
+      // 次選 localStorage
+      try {
+        const local = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed && typeof parsed === 'object') {
+            hydrateData(parsed);
+            saveData(); // 回寫 IndexedDB
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 初次使用套用示範資料
+      appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      saveData();
+    }
+
+    // 安全資料映射
+    function hydrateData(parsed) {
+      appData = {
+        accounts: Array.isArray(parsed.accounts) ? parsed.accounts : [...DEFAULT_DATA.accounts],
+        cards: Array.isArray(parsed.cards) ? parsed.cards : [...DEFAULT_DATA.cards],
+        funds: Array.isArray(parsed.funds) ? parsed.funds : [...DEFAULT_DATA.funds],
+        salaryConfig: parsed.salaryConfig || { ...DEFAULT_DATA.salaryConfig },
+        transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [...DEFAULT_DATA.transactions]
+      };
+    }
+
+    // ========================================================
+    // 總渲染調度 (renderAll)
+    // ========================================================
+    function renderAll() {
+      renderDashboard();
+      renderTransactions();
+      renderFunds();
+      renderCards();
+      renderSalary();
+      renderAccounts();
+      renderCharts();
+      updateDynamicOptions();
+    }
+
+    // 1. 儀表板計算
+    function renderDashboard() {
+      const totalCash = (appData.accounts || []).reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
+      const totalFund = (appData.funds || []).reduce((sum, f) => sum + (Number(f.marketValue) || 0), 0);
+      const totalAssets = totalCash + totalFund;
+      const totalLiabilities = (appData.cards || []).reduce((sum, c) => sum + (Number(c.currentBill) || 0), 0);
+      const netWorth = totalAssets - totalLiabilities;
+
+      // 當月收支試算
+      const now = new Date();
+      const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      let monthIncome = 0;
+      let monthExpense = 0;
+
+      (appData.transactions || []).forEach(tx => {
+        if (tx.date && tx.date.startsWith(currentMonthKey)) {
+          const amt = Number(tx.amount) || 0;
+          if (tx.type === 'INCOME') monthIncome += amt;
+          if (tx.type === 'EXPENSE') monthExpense += amt;
+        }
+      });
+      const monthBalance = monthIncome - monthExpense;
+
+      const setEl = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+
+      setEl('dashNetWorth', `$${formatCurrency(netWorth)}`);
+      setEl('dashTotalAssets', `$${formatCurrency(totalAssets)}`);
+      setEl('dashTotalLiabilities', `$${formatCurrency(totalLiabilities)}`);
+
+      const elBal = document.getElementById('dashMonthBalance');
+      if (elBal) {
+        elBal.textContent = `${monthBalance >= 0 ? '+' : ''}$${formatCurrency(monthBalance)}`;
+        elBal.className = `text-sm sm:text-lg font-mono font-bold ${monthBalance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      }
+
+      const dateToday = document.getElementById('dashDateToday');
+      if (dateToday) {
+        dateToday.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      }
+    }
+
+    // 2. 流水帳渲染
+    function renderTransactions() {
+      const container = document.getElementById('txListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = [...(appData.transactions || [])];
+      if (currentFilter !== 'ALL') {
+        list = list.filter(t => t.type === currentFilter);
+      }
+      list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="py-12 text-center text-slate-500 font-mono text-sm">尚無記帳明細</div>';
+        return;
+      }
+
+      list.forEach(tx => {
+        const isIncome = tx.type === 'INCOME';
+        let accountName = '現金錢包';
+        const bank = (appData.accounts || []).find(a => a.id === tx.account);
+        const card = (appData.cards || []).find(c => c.id === tx.account);
+        if (bank) accountName = bank.name;
+        if (card) accountName = `💳 ${card.name}`;
+
+        const item = document.createElement('div');
+        item.className = 'glass-card p-3 sm:p-4 rounded-xl flex items-center justify-between';
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} border border-gold-subtle">
+              <i class="ph-bold ${isIncome ? 'ph-arrow-down-left' : 'ph-arrow-up-right'} text-lg"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-bold text-slate-200">${tx.category || '一般'}</span>
+                <span class="text-[10px] font-mono text-slate-400 bg-black-950 px-2 py-0.5 rounded border border-gold-subtle">${accountName}</span>
+              </div>
+              <div class="text-[11px] font-mono text-slate-400 mt-0.5">
+                <span>${tx.date}</span>
+                ${tx.note ? `<span>• ${tx.note}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-sm sm:text-base font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-slate-100'}">
+              ${isIncome ? '+' : '-'}$${formatCurrency(tx.amount)}
+            </span>
+            <button onclick="deleteTransaction('${tx.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-sm"><i class="ph ph-trash"></i></button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // 3. 基金投資渲染 (桌機表格 + 手機專屬自適應大卡片)
+    function renderFunds() {
+      const tbody = document.getElementById('fundTableBody');
+      const mobileList = document.getElementById('fundCardListMobile');
+      if (tbody) tbody.innerHTML = '';
+      if (mobileList) mobileList.innerHTML = '';
+
+      let totalCost = 0;
+      let totalMarket = 0;
+
+      (appData.funds || []).forEach(f => {
+        const cost = Number(f.cost) || 0;
+        const market = Number(f.marketValue) || 0;
+        const profit = market - cost;
+        const roi = cost > 0 ? ((profit / cost) * 100).toFixed(2) : 0;
+        const isPositive = profit >= 0;
+
+        totalCost += cost;
+        totalMarket += market;
+
+        // 電腦版橫列
+        if (tbody) {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b border-gold-subtle hover:bg-gold-500/5 transition font-mono';
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-sans font-semibold text-slate-100">${f.name}</td>
+            <td class="py-3 px-4 text-right text-slate-300">${formatCurrency(f.units)}</td>
+            <td class="py-3 px-4 text-right text-slate-400">$${formatCurrency(cost)}</td>
+            <td class="py-3 px-4 text-right text-gold-gradient font-bold">$${formatCurrency(market)}</td>
+            <td class="py-3 px-4 text-right font-bold ${isPositive ? 'text-rose-400' : 'text-emerald-400'}">
+              ${isPositive ? '+' : ''}$${formatCurrency(profit)}
+            </td>
+            <td class="py-3 px-4 text-right font-bold ${isPositive ? 'text-rose-400' : 'text-emerald-400'}">
+              ${isPositive ? '+' : ''}${roi}%
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="editFund('${f.id}')" class="p-1 text-slate-400 hover:text-gold-300"><i class="ph ph-pencil-simple text-base"></i></button>
+              <button onclick="deleteFund('${f.id}')" class="p-1 text-slate-400 hover:text-rose-400"><i class="ph ph-trash text-base"></i></button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+        // 手機版大卡片 (零破版體驗)
+        if (mobileList) {
+          const card = document.createElement('div');
+          card.className = 'glass-card p-4 rounded-2xl border border-gold-subtle space-y-3';
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-slate-100 text-sm">${f.name}</h4>
+                <span class="text-[11px] font-mono text-slate-400">持有股數: ${formatCurrency(f.units)}</span>
+              </div>
+              <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full ${isPositive ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}">
+                ${isPositive ? '+' : ''}${roi}%
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gold-subtle text-xs font-mono">
+              <div><span class="text-slate-400">購入本金:</span> <span class="text-slate-200">$${formatCurrency(cost)}</span></div>
+              <div><span class="text-slate-400">目前市值:</span> <span class="text-gold-400 font-bold">$${formatCurrency(market)}</span></div>
+              <div class="col-span-2 flex justify-between items-center pt-1">
+                <span class="text-slate-400">未實現損益:</span>
+                <span class="text-sm font-bold ${isPositive ? 'text-rose-400' : 'text-emerald-400'}">${isPositive ? '+' : ''}$${formatCurrency(profit)}</span>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-gold-subtle text-xs">
+              <button onclick="editFund('${f.id}')" class="px-3 py-1 rounded-lg border border-gold-subtle text-gold-400">編輯</button>
+              <button onclick="deleteFund('${f.id}')" class="px-3 py-1 rounded-lg border border-rose-500/30 text-rose-400">刪除</button>
+            </div>
+          `;
+          mobileList.appendChild(card);
+        }
+      });
+
+      const totalProfit = totalMarket - totalCost;
+      const totalRoi = totalCost > 0 ? ((totalProfit / totalCost) * 100).toFixed(2) : 0;
+      const isTotalPositive = totalProfit >= 0;
+
+      const setEl = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+      setEl('fundTotalCost', `$${formatCurrency(totalCost)}`);
+      setEl('fundTotalMarket', `$${formatCurrency(totalMarket)}`);
+
+      const elProfit = document.getElementById('fundTotalProfit');
+      if (elProfit) {
+        elProfit.textContent = `${isTotalPositive ? '+' : ''}$${formatCurrency(totalProfit)}`;
+        elProfit.className = `text-base sm:text-lg font-mono font-bold ${isTotalPositive ? 'text-rose-400' : 'text-emerald-400'}`;
+      }
+
+      const elRoi = document.getElementById('fundTotalRoi');
+      if (elRoi) {
+        elRoi.textContent = `${isTotalPositive ? '+' : ''}${totalRoi}%`;
+        elRoi.className = `text-base sm:text-lg font-mono font-bold ${isTotalPositive ? 'text-rose-400' : 'text-emerald-400'}`;
+      }
+    }
+
+    // 4. 信用卡清單渲染
+    function renderCards() {
+      const container = document.getElementById('cardGridContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const cards = appData.cards || [];
+      if (cards.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500 font-mono text-sm">尚未建立信用卡</div>';
+        return;
+      }
+
+      const today = new Date();
+      cards.forEach(c => {
+        let countdownBadge = '';
+        if (c.dueDate) {
+          const due = new Date(c.dueDate);
+          const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0) {
+            countdownBadge = `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${diffDays <= 3 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-gold-500/10 text-gold-400'}">倒數 ${diffDays} 天</span>`;
+          } else {
+            countdownBadge = `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-400">已逾期 ${Math.abs(diffDays)} 天</span>`;
+          }
+        }
+
+        const div = document.createElement('div');
+        div.className = 'glass-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between space-y-4';
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-gold-400 tracking-widest uppercase">CREDIT CARD</span>
+                <h4 class="text-base font-bold text-slate-100">${c.name}</h4>
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="editCard('${c.id}')" class="p-1 text-slate-400 hover:text-gold-300"><i class="ph ph-pencil-simple text-base"></i></button>
+                <button onclick="deleteCard('${c.id}')" class="p-1 text-slate-400 hover:text-rose-400"><i class="ph ph-trash text-base"></i></button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-gold-subtle">
+              <div>
+                <span class="text-[11px] text-slate-400 block font-mono">本期應繳帳單</span>
+                <span class="text-lg font-mono font-bold text-rose-400">$${formatCurrency(c.currentBill)}</span>
+              </div>
+              <div>
+                <span class="text-[11px] text-slate-400 block font-mono">未出帳消費</span>
+                <span class="text-lg font-mono font-semibold text-slate-200">$${formatCurrency(c.unbilled)}</span>
+              </div>
+            </div>
+
+            <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span>繳款截止: ${c.dueDate || '未設定'}</span>
+              ${countdownBadge}
+            </div>
+          </div>
+
+          <div>
+            <button onclick="openPayCardModal('${c.id}')" class="w-full py-2.5 bg-gold-metallic text-black-950 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-gold-btn active:scale-95 transition">
+              <i class="ph-bold ph-check-circle"></i>
+              <span>一鍵結清本期卡費</span>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 5. 薪資分流配置
+    function renderSalary() {
+      const cfg = appData.salaryConfig || { baseSalary: 72000, payday: 5, ratios: { living: 40, investment: 30, emergency: 20, fun: 10 } };
+      const baseSalary = Number(cfg.baseSalary) || 0;
+      const ratios = cfg.ratios || { living: 40, investment: 30, emergency: 20, fun: 10 };
+
+      const inputBase = document.getElementById('inputSalaryBase');
+      const inputPayday = document.getElementById('inputSalaryPayday');
+      if (inputBase && !inputBase.matches(':focus')) inputBase.value = baseSalary;
+      if (inputPayday && !inputPayday.matches(':focus')) inputPayday.value = cfg.payday || 5;
+
+      const amtLiving = Math.round(baseSalary * (ratios.living / 100));
+      const amtInvest = Math.round(baseSalary * (ratios.investment / 100));
+      const amtEmergency = Math.round(baseSalary * (ratios.emergency / 100));
+      const amtFun = Math.round(baseSalary * (ratios.fun / 100));
+
+      const setEl = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+
+      setEl('labelRatioLiving', `${ratios.living}%`);
+      setEl('amtLiving', `$${formatCurrency(amtLiving)}`);
+      setEl('labelRatioInvest', `${ratios.investment}%`);
+      setEl('amtInvest', `$${formatCurrency(amtInvest)}`);
+      setEl('labelRatioEmergency', `${ratios.emergency}%`);
+      setEl('amtEmergency', `$${formatCurrency(amtEmergency)}`);
+      setEl('labelRatioFun', `${ratios.fun}%`);
+      setEl('amtFun', `$${formatCurrency(amtFun)}`);
+
+      const sLiving = document.getElementById('sliderLiving');
+      const sInvest = document.getElementById('sliderInvest');
+      const sEmer = document.getElementById('sliderEmergency');
+      const sFun = document.getElementById('sliderFun');
+
+      if (sLiving && !sLiving.matches(':focus')) sLiving.value = ratios.living;
+      if (sInvest && !sInvest.matches(':focus')) sInvest.value = ratios.investment;
+      if (sEmer && !sEmer.matches(':focus')) sEmer.value = ratios.emergency;
+      if (sFun && !sFun.matches(':focus')) sFun.value = ratios.fun;
+    }
+
+    // 6. 帳戶列表渲染
+    function renderAccounts() {
+      const container = document.getElementById('accountGridContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const accs = appData.accounts || [];
+      if (accs.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500 font-mono text-sm">尚未建立帳戶</div>';
+        return;
+      }
+
+      accs.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-4 rounded-2xl flex flex-col justify-between space-y-3';
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center space-x-1.5 text-xs text-gold-400 font-mono">
+                <i class="ph-bold ${a.type === 'bank' ? 'ph-bank' : 'ph-money'} text-sm"></i>
+                <span>${a.type === 'bank' ? '活存帳戶' : '隨身錢包'}</span>
+              </span>
+              <div class="flex items-center space-x-1">
+                <button onclick="editAccount('${a.id}')" class="p-1 text-slate-400 hover:text-gold-300"><i class="ph ph-pencil-simple"></i></button>
+                <button onclick="deleteAccount('${a.id}')" class="p-1 text-slate-400 hover:text-rose-400"><i class="ph ph-trash"></i></button>
+              </div>
+            </div>
+            <h4 class="text-base font-bold text-slate-100">${a.name}</h4>
+          </div>
+          <div class="pt-2 border-t border-gold-subtle flex items-baseline justify-between">
+            <span class="text-xs text-slate-400 font-mono">可用餘額</span>
+            <span class="text-lg font-mono font-bold text-gold-gradient">$${formatCurrency(a.balance)}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 7. Chart.js 圖表繪製
+    function renderCharts() {
+      // 資產配置環狀圖
+      const ctxPie = document.getElementById('chartPieAssets');
+      if (ctxPie && window.Chart) {
+        const totalCash = (appData.accounts || []).reduce((s, a) => s + (Number(a.balance) || 0), 0);
+        const totalFund = (appData.funds || []).reduce((s, f) => s + (Number(f.marketValue) || 0), 0);
+
+        if (chartPie) {
+          chartPie.data.datasets[0].data = [totalCash, totalFund];
+          chartPie.update();
+        } else {
+          chartPie = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+              labels: ['現金與活存', '基金投資總市值'],
+              datasets: [{
+                data: [totalCash, totalFund],
+                backgroundColor: ['#d4af37', '#aa821f'],
+                borderColor: '#07080b',
+                borderWidth: 3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Outfit', size: 11 } } }
+              },
+              cutout: '72%'
+            }
+          });
+        }
+      }
+
+      // 開銷柱狀圖
+      const ctxBar = document.getElementById('chartBarExpense');
+      if (ctxBar && window.Chart) {
+        const categoryMap = {};
+        (appData.transactions || []).forEach(tx => {
+          if (tx.type === 'EXPENSE') {
+            const cat = tx.category || '其他';
+            categoryMap[cat] = (categoryMap[cat] || 0) + (Number(tx.amount) || 0);
+          }
+        });
+
+        const labels = Object.keys(categoryMap);
+        const data = Object.values(categoryMap);
+
+        if (chartBar) {
+          chartBar.data.labels = labels.length ? labels : ['無開銷'];
+          chartBar.data.datasets[0].data = data.length ? data : [0];
+          chartBar.update();
+        } else {
+          chartBar = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+              labels: labels.length ? labels : ['無開銷'],
+              datasets: [{
+                data: data.length ? data : [0],
+                backgroundColor: 'rgba(212, 175, 55, 0.75)',
+                borderRadius: 8
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } }, grid: { display: false } },
+                y: { ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } }, grid: { color: 'rgba(212, 175, 55, 0.08)' } }
+              }
+            }
+          });
+        }
+      }
+    }
+
+    // 8. 動態下拉選項更新 (記帳與繳卡費)
+    function updateDynamicOptions() {
+      // 記帳下拉選單
+      const selTx = document.getElementById('txAccount');
+      if (selTx) {
+        selTx.innerHTML = '';
+        const groupBank = document.createElement('optgroup');
+        groupBank.label = '銀行活存與現金';
+        (appData.accounts || []).forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = `${a.name} ($${formatCurrency(a.balance)})`;
+          groupBank.appendChild(opt);
+        });
+        selTx.appendChild(groupBank);
+
+        const groupCard = document.createElement('optgroup');
+        groupCard.label = '信用卡付款 (列入未出帳)';
+        (appData.cards || []).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `💳 ${c.name}`;
+          groupCard.appendChild(opt);
+        });
+        selTx.appendChild(groupCard);
+      }
+
+      // 繳卡費扣款帳戶下拉
+      const selPay = document.getElementById('payCardAccountSelect');
+      if (selPay) {
+        selPay.innerHTML = '';
+        (appData.accounts || []).forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = `${a.name} (餘額: $${formatCurrency(a.balance)})`;
+          selPay.appendChild(opt);
+        });
+      }
+    }
+
+    // ========================================================
+    // 使用者互動與 CRUD
+    // ========================================================
+
+    // 分頁切換 (同步適配電腦與手機 Tab)
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      const target = document.getElementById(`view-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      // 電腦版 Tab 樣式
+      document.querySelectorAll('.pc-nav-btn').forEach(btn => {
+        btn.classList.remove('border-gold-500', 'text-gold-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      const activePc = document.getElementById(`pc-tab-${tabId}`);
+      if (activePc) {
+        activePc.classList.remove('border-transparent', 'text-slate-400');
+        activePc.classList.add('border-gold-500', 'text-gold-400');
+      }
+
+      // 手機版 Tab 樣式
+      document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+        btn.classList.remove('text-gold-400');
+        btn.classList.add('text-slate-400');
+      });
+      const activeMob = document.getElementById(`mob-tab-${tabId}`);
+      if (activeMob) {
+        activeMob.classList.remove('text-slate-400');
+        activeMob.classList.add('text-gold-400');
+      }
+
+      // 視窗 resize 圖表
+      if (tabId === 'dashboard') {
+        setTimeout(() => {
+          if (chartPie) chartPie.resize();
+          if (chartBar) chartBar.resize();
+        }, 150);
+      }
+    }
+
+    // 彈窗開關控制
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    // 儲存收支
+    function saveTransaction() {
+      const type = document.getElementById('txType')?.value || 'EXPENSE';
+      const category = document.getElementById('txCategory')?.value || '其他';
+      const amount = Number(document.getElementById('txAmount')?.value) || 0;
+      const account = document.getElementById('txAccount')?.value;
+      const date = document.getElementById('txDate')?.value || new Date().toISOString().split('T')[0];
+      const note = document.getElementById('txNote')?.value || '';
+
+      if (amount <= 0) {
+        showToast('請輸入大於 0 的金額');
+        return;
+      }
+
+      // 連動扣減帳戶或累計信用卡未出帳
+      if (type === 'EXPENSE') {
+        const bank = (appData.accounts || []).find(a => a.id === account);
+        if (bank) {
+          bank.balance = (Number(bank.balance) || 0) - amount;
+        } else {
+          const card = (appData.cards || []).find(c => c.id === account);
+          if (card) {
+            card.unbilled = (Number(card.unbilled) || 0) + amount;
+          }
+        }
+      } else {
+        const bank = (appData.accounts || []).find(a => a.id === account);
+        if (bank) {
+          bank.balance = (Number(bank.balance) || 0) + amount;
+        }
+      }
+
+      appData.transactions = appData.transactions || [];
+      appData.transactions.unshift({
+        id: `tx-${Date.now()}`,
+        date,
+        type,
+        category,
+        amount,
+        account,
+        note
+      });
+
+      saveData();
+      renderAll();
+      closeModal('modalTx');
+      showToast('記帳成功');
+      const amtInput = document.getElementById('txAmount');
+      const noteInput = document.getElementById('txNote');
+      if (amtInput) amtInput.value = '';
+      if (noteInput) noteInput.value = '';
+    }
+
+    // 刪除收支
+    function deleteTransaction(id) {
+      appData.transactions = (appData.transactions || []).filter(t => t.id !== id);
+      saveData();
+      renderAll();
+      showToast('記錄已刪除');
+    }
+
+    // 流水帳篩選
+    function filterTx(type) {
+      currentFilter = type;
+      document.querySelectorAll('.tx-filter-pill').forEach(b => {
+        b.className = 'tx-filter-pill px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-slate-400 border border-gold-subtle hover:bg-gold-500/10 whitespace-nowrap';
+      });
+      const active = document.getElementById(`filter-${type.toLowerCase()}`);
+      if (active) {
+        active.className = 'tx-filter-pill px-3.5 py-1.5 rounded-full text-xs font-mono font-medium bg-gold-500/20 text-gold-400 border border-gold-500/40 whitespace-nowrap';
+      }
+      renderTransactions();
+    }
+
+    // 基金投資操作
+    function openAddFundModal() {
+      const title = document.getElementById('fundModalTitle');
+      if (title) title.textContent = '新增投資標的';
+      const elId = document.getElementById('fundId');
+      const elName = document.getElementById('fundName');
+      const elUnits = document.getElementById('fundUnits');
+      const elCost = document.getElementById('fundCost');
+      const elMarket = document.getElementById('fundMarketValue');
+      if (elId) elId.value = '';
+      if (elName) elName.value = '';
+      if (elUnits) elUnits.value = '';
+      if (elCost) elCost.value = '';
+      if (elMarket) elMarket.value = '';
+      openModal('modalFund');
+    }
+
+    function editFund(id) {
+      const fund = (appData.funds || []).find(f => f.id === id);
+      if (!fund) return;
+      const title = document.getElementById('fundModalTitle');
+      if (title) title.textContent = '編輯投資標的';
+      const elId = document.getElementById('fundId');
+      const elName = document.getElementById('fundName');
+      const elUnits = document.getElementById('fundUnits');
+      const elCost = document.getElementById('fundCost');
+      const elMarket = document.getElementById('fundMarketValue');
+      if (elId) elId.value = fund.id;
+      if (elName) elName.value = fund.name || '';
+      if (elUnits) elUnits.value = fund.units || '';
+      if (elCost) elCost.value = fund.cost || '';
+      if (elMarket) elMarket.value = fund.marketValue || '';
+      openModal('modalFund');
+    }
+
+    function saveFund() {
+      const id = document.getElementById('fundId')?.value;
+      const name = document.getElementById('fundName')?.value || '未命名基金';
+      const units = Number(document.getElementById('fundUnits')?.value) || 0;
+      const cost = Number(document.getElementById('fundCost')?.value) || 0;
+      const marketValue = Number(document.getElementById('fundMarketValue')?.value) || 0;
+
+      appData.funds = appData.funds || [];
+      if (id) {
+        const item = appData.funds.find(f => f.id === id);
+        if (item) {
+          item.name = name;
+          item.units = units;
+          item.cost = cost;
+          item.marketValue = marketValue;
+        }
+      } else {
+        appData.funds.push({ id: `fund-${Date.now()}`, name, units, cost, marketValue });
+      }
+      saveData();
+      renderAll();
+      closeModal('modalFund');
+      showToast('投資標的已更新');
+    }
+
+    function deleteFund(id) {
+      appData.funds = (appData.funds || []).filter(f => f.id !== id);
+      saveData();
+      renderAll();
+      showToast('投資標的已刪除');
+    }
+
+    // 信用卡操作
+    function openAddCardModal() {
+      const title = document.getElementById('cardModalTitle');
+      if (title) title.textContent = '新增信用卡';
+      const elId = document.getElementById('cardId');
+      const elName = document.getElementById('cardName');
+      const elBill = document.getElementById('cardBill');
+      const elUnbilled = document.getElementById('cardUnbilled');
+      const elDueDate = document.getElementById('cardDueDate');
+      if (elId) elId.value = '';
+      if (elName) elName.value = '';
+      if (elBill) elBill.value = '';
+      if (elUnbilled) elUnbilled.value = '';
+      if (elDueDate) elDueDate.value = '';
+      openModal('modalCard');
+    }
+
+    function editCard(id) {
+      const card = (appData.cards || []).find(c => c.id === id);
+      if (!card) return;
+      const title = document.getElementById('cardModalTitle');
+      if (title) title.textContent = '編輯信用卡';
+      const elId = document.getElementById('cardId');
+      const elName = document.getElementById('cardName');
+      const elBill = document.getElementById('cardBill');
+      const elUnbilled = document.getElementById('cardUnbilled');
+      const elDueDate = document.getElementById('cardDueDate');
+      if (elId) elId.value = card.id;
+      if (elName) elName.value = card.name || '';
+      if (elBill) elBill.value = card.currentBill || '';
+      if (elUnbilled) elUnbilled.value = card.unbilled || '';
+      if (elDueDate) elDueDate.value = card.dueDate || '';
+      openModal('modalCard');
+    }
+
+    function saveCard() {
+      const id = document.getElementById('cardId')?.value;
+      const name = document.getElementById('cardName')?.value || '未命名卡片';
+      const currentBill = Number(document.getElementById('cardBill')?.value) || 0;
+      const unbilled = Number(document.getElementById('cardUnbilled')?.value) || 0;
+      const dueDate = document.getElementById('cardDueDate')?.value || '';
+
+      appData.cards = appData.cards || [];
+      if (id) {
+        const item = appData.cards.find(c => c.id === id);
+        if (item) {
+          item.name = name;
+          item.currentBill = currentBill;
+          item.unbilled = unbilled;
+          item.dueDate = dueDate;
+        }
+      } else {
+        appData.cards.push({ id: `card-${Date.now()}`, name, currentBill, unbilled, dueDate });
+      }
+      saveData();
+      renderAll();
+      closeModal('modalCard');
+      showToast('信用卡已儲存');
+    }
+
+    function deleteCard(id) {
+      appData.cards = (appData.cards || []).filter(c => c.id !== id);
+      saveData();
+      renderAll();
+      showToast('信用卡已移除');
+    }
+
+    // 結清卡費
+    function openPayCardModal(cardId) {
+      currentPayingCardId = cardId;
+      const card = (appData.cards || []).find(c => c.id === cardId);
+      if (!card) return;
+      const nameLabel = document.getElementById('payCardNameLabel');
+      const amtLabel = document.getElementById('payCardAmountLabel');
+      if (nameLabel) nameLabel.textContent = card.name;
+      if (amtLabel) amtLabel.textContent = `$${formatCurrency(card.currentBill)}`;
+      openModal('modalPayCard');
+    }
+
+    function confirmPayCard() {
+      if (!currentPayingCardId) return;
+      const card = (appData.cards || []).find(c => c.id === currentPayingCardId);
+      const accId = document.getElementById('payCardAccountSelect')?.value;
+      const bank = (appData.accounts || []).find(a => a.id === accId);
+
+      if (!card || !bank) {
+        showToast('請選擇有效的扣款帳戶');
+        return;
+      }
+
+      const billAmt = Number(card.currentBill) || 0;
+      if (billAmt <= 0) {
+        showToast('本期卡費為 0，無需結清');
+        closeModal('modalPayCard');
+        return;
+      }
+
+      if (Number(bank.balance) < billAmt) {
+        showToast('該帳戶可用餘額不足以支付卡費');
+        return;
+      }
+
+      bank.balance -= billAmt;
+      card.currentBill = 0;
+
+      // 產生支出流水帳
+      appData.transactions = appData.transactions || [];
+      appData.transactions.unshift({
+        id: `tx-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0],
+        type: 'EXPENSE',
+        category: '信用卡費',
+        amount: billAmt,
+        account: bank.id,
+        note: `結清 ${card.name} 應繳帳單`
+      });
+
+      saveData();
+      renderAll();
+      closeModal('modalPayCard');
+      showToast(`已成功結清 ${card.name} 卡費`);
+    }
+
+    // 帳戶操作
+    function openAddAccountModal() {
+      const title = document.getElementById('accountModalTitle');
+      if (title) title.textContent = '新增帳戶錢包';
+      const elId = document.getElementById('accId');
+      const elName = document.getElementById('accName');
+      const elType = document.getElementById('accType');
+      const elBal = document.getElementById('accBalance');
+      if (elId) elId.value = '';
+      if (elName) elName.value = '';
+      if (elType) elType.value = 'bank';
+      if (elBal) elBal.value = '';
+      openModal('modalAccount');
+    }
+
+    function editAccount(id) {
+      const acc = (appData.accounts || []).find(a => a.id === id);
+      if (!acc) return;
+      const title = document.getElementById('accountModalTitle');
+      if (title) title.textContent = '編輯帳戶錢包';
+      const elId = document.getElementById('accId');
+      const elName = document.getElementById('accName');
+      const elType = document.getElementById('accType');
+      const elBal = document.getElementById('accBalance');
+      if (elId) elId.value = acc.id;
+      if (elName) elName.value = acc.name || '';
+      if (elType) elType.value = acc.type || 'bank';
+      if (elBal) elBal.value = acc.balance || 0;
+      openModal('modalAccount');
+    }
+
+    function saveAccount() {
+      const id = document.getElementById('accId')?.value;
+      const name = document.getElementById('accName')?.value || '未命名帳戶';
+      const type = document.getElementById('accType')?.value || 'bank';
+      const balance = Number(document.getElementById('accBalance')?.value) || 0;
+
+      appData.accounts = appData.accounts || [];
+      if (id) {
+        const item = appData.accounts.find(a => a.id === id);
+        if (item) {
+          item.name = name;
+          item.type = type;
+          item.balance = balance;
+        }
+      } else {
+        appData.accounts.push({ id: `acc-${Date.now()}`, name, type, balance });
+      }
+      saveData();
+      renderAll();
+      closeModal('modalAccount');
+      showToast('帳戶資料已更新');
+    }
+
+    function deleteAccount(id) {
+      appData.accounts = (appData.accounts || []).filter(a => a.id !== id);
+      saveData();
+      renderAll();
+      showToast('帳戶已移除');
+    }
+
+    // 薪資配置更新
+    function onSalaryConfigChange() {
+      const baseSalary = Number(document.getElementById('inputSalaryBase')?.value) || 0;
+      const payday = Number(document.getElementById('inputSalaryPayday')?.value) || 5;
+      const living = Number(document.getElementById('sliderLiving')?.value) || 40;
+      const investment = Number(document.getElementById('sliderInvest')?.value) || 30;
+      const emergency = Number(document.getElementById('sliderEmergency')?.value) || 20;
+      const fun = Number(document.getElementById('sliderFun')?.value) || 10;
+
+      appData.salaryConfig = {
+        baseSalary,
+        payday,
+        ratios: { living, investment, emergency, fun }
+      };
+
+      saveData();
+      renderSalary();
+    }
+
+    // 一鍵發薪入帳
+    function simulateSalaryPayday() {
+      const cfg = appData.salaryConfig || { baseSalary: 72000 };
+      const base = Number(cfg.baseSalary) || 0;
+      if (base <= 0) {
+        showToast('請先設定有效的底薪金額');
+        return;
+      }
+
+      // 優先存入第一個活存帳戶
+      let primaryAcc = (appData.accounts || []).find(a => a.type === 'bank');
+      if (!primaryAcc && (appData.accounts || []).length > 0) primaryAcc = appData.accounts[0];
+
+      if (primaryAcc) {
+        primaryAcc.balance = (Number(primaryAcc.balance) || 0) + base;
+      }
+
+      appData.transactions = appData.transactions || [];
+      appData.transactions.unshift({
+        id: `tx-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0],
+        type: 'INCOME',
+        category: '薪資入帳',
+        amount: base,
+        account: primaryAcc ? primaryAcc.id : '',
+        note: '本月薪資自動撥款入庫'
+      });
+
+      saveData();
+      renderAll();
+      showToast(`已成功入帳薪資 $${formatCurrency(base)}`);
+    }
+
+    // 匯出 JSON 備份檔
+    function exportData() {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `小強資產_備份_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('備份檔案下載成功');
+    }
+
+    // 頁面初始化
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 預設日期輸入為今天
+      const todayStr = new Date().toISOString().split('T')[0];
+      const txDateInput = document.getElementById('txDate');
+      if (txDateInput) txDateInput.value = todayStr;
+
+      // 載入資料並啟動視圖
+      await loadData();
+      renderAll();
+
+      // 監聽螢幕翻轉與大小改變
+      window.addEventListener('resize', () => {
+        if (chartPie) chartPie.resize();
+        if (chartBar) chartBar.resize();
+      });
+    });
+  </script>
+</body>
+</html>
